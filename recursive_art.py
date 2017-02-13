@@ -1,7 +1,30 @@
-""" TODO: Put your header comment here """
+"""Generates random art!!"""
 
 import random
+import math
 from PIL import Image
+
+
+def random_function():
+    '''returns a random function'''
+    random_num = random.random()
+    number_of_funcs = 8
+    if random_num <= (1/number_of_funcs):
+        return "prod"
+    elif random_num <= (2/number_of_funcs):
+        return "avg"
+    elif random_num <= (3/number_of_funcs):
+        return "cos_pi"
+    elif random_num <= (4/number_of_funcs):
+        return "sin_pi"
+    elif random_num <= (5/number_of_funcs):
+        return "geo_mean"
+    elif random_num <= (6/number_of_funcs):
+        return "square"
+    elif random_num <= (7/number_of_funcs):
+        return "x"
+    else:
+        return "y"
 
 
 def build_random_function(min_depth, max_depth):
@@ -15,8 +38,16 @@ def build_random_function(min_depth, max_depth):
                  (see assignment writeup for details on the representation of
                  these functions)
     """
-    # TODO: implement this
-    pass
+    # base case: depth = 0, return either x or y
+    if min_depth <= 0:
+        random_num = random.randint(0, 1)
+        if random_num:
+            return "x"
+        return "y"
+    else:
+        rand_func = random_function()
+        return [rand_func, build_random_function(min_depth-1, max_depth),
+                build_random_function(min_depth-1, max_depth)]
 
 
 def evaluate_random_function(f, x, y):
@@ -33,8 +64,25 @@ def evaluate_random_function(f, x, y):
         >>> evaluate_random_function(["y"],0.1,0.02)
         0.02
     """
-    # TODO: implement this
-    pass
+    if f[0] == "x":
+        return x
+    elif f[0] == "y":
+        return y
+    else:
+        x_local = evaluate_random_function(f[1], x, y)
+        y_local = evaluate_random_function(f[2], x, y)
+        if f[0] == "prod":
+            return x_local*y_local
+        elif f[0] == "avg":
+            return (x + y)/2
+        elif f[0] == "cos_pi":
+            return math.cos(math.pi*x_local)
+        elif f[0] == "sin_pi":
+            return math.sin(math.pi*x_local)
+        elif f[0] == "geo_mean":
+            return math.sqrt((x_local**2)*(y_local**2))
+        elif f[0] == "square":
+            return x**2
 
 
 def remap_interval(val,
@@ -64,8 +112,18 @@ def remap_interval(val,
         >>> remap_interval(5, 4, 6, 1, 2)
         1.5
     """
-    # TODO: implement this
-    pass
+    # input range as input_interval_end minus input_interval_start
+    input_range = input_interval_end - input_interval_start
+    # output range
+    output_range = output_interval_end - output_interval_start
+    # scale as output_range/input_range, used to find saled value
+    scale = output_range/input_range
+
+    # finds val (initially in input_range scale) in output_range scale)
+    offset_val = val - input_interval_start
+    mapped_val = offset_val*scale + output_interval_start
+
+    return mapped_val
 
 
 def color_map(val):
@@ -116,9 +174,9 @@ def generate_art(filename, x_size=350, y_size=350):
         x_size, y_size: optional args to set image dimensions (default: 350)
     """
     # Functions for red, green, and blue channels - where the magic happens!
-    red_function = ["x"]
-    green_function = ["y"]
-    blue_function = ["x"]
+    red_function = build_random_function(7, 9)
+    green_function = build_random_function(7, 9)
+    blue_function = build_random_function(7, 9)
 
     # Create image and loop over all pixels
     im = Image.new("RGB", (x_size, y_size))
@@ -143,8 +201,8 @@ if __name__ == '__main__':
     # Create some computational art!
     # TODO: Un-comment the generate_art function call after you
     #       implement remap_interval and evaluate_random_function
-    # generate_art("myart.png")
+    generate_art("myart.png")
 
     # Test that PIL is installed correctly
     # TODO: Comment or remove this function call after testing PIL install
-    test_image("noise.png")
+    # test_image("noise.png")
